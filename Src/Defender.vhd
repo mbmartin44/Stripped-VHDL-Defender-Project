@@ -1,3 +1,8 @@
+------------------------------------------------------------------------------------------------------------------------------------------
+-- Project: Defender (DSD Final Project Fall 2021)
+-- Authors: Blake Martin & Nathan Gardner
+-- Date: 11/30/21
+------------------------------------------------------------------------------------------------------------------------------------------
 LIBRARY iEEE;
 USE IEEE.std_logic_1164.ALL;
 USE IEEE.numeric_std.ALL;
@@ -77,19 +82,11 @@ ARCHITECTURE controller OF defender IS
 	SIGNAL inObj : BOOLEAN := false;
 
 	SIGNAL obj_rom_addr, obj_rom_col : INTEGER;
-	--signal obj_rom_data: std_logic_vector (0 to 24);
 	SIGNAL obj_rom_bit : STD_LOGIC;
 	-----------------------------------------------------------------
 	SIGNAL sky_Sig : sky_data := init_sky;
-	--********************************BEGIN **********************************************************************************
 BEGIN
-
-	-- simply a process for probing specified signals by reading them from LED's
-
-	--NEED FSM FOR PAUSE TO HOLD STATE UNTIL SECOND PUSH****
-	-- pause <= not key0; -- runs when pause = 0
-
-	------------------------------------------
+-----------------------------------------*** Added by Nathan--------------
 	-- This entity maps the score to ROM
 	scoreboard : ENTITY work.scoreboard
 		PORT MAP(
@@ -102,19 +99,19 @@ BEGIN
 			pause => pause,
 			waveCount => waveCount
 		);
-	------------------------------------------------------------------------------------------------------------------------------
+	-----------------------------------------*** Added by Blake--------------
 	-- This entity receives user-input and maps it onto a data structure labeled as player_controls
 	PlayerControls : ENTITY work.shipController PORT MAP(clk, ShiftMagx, shiftMagy, x_shiftDir, y_shiftDir, key1, player_controls);
 
-	--------------------------------------------------------------------------------------------------------------------------------
+	-----------------------------------------*** Added by Blake--------------
 	--This entity receives the player controls and game dynamics signals and outputs the ship's dynamics data for pixel-mapping
 	playerShip : ENTITY work.ship
 		PORT MAP(
 			-- inputs:
-			pause => pause, -- output of pause FSM
-			clk => clk, -- 50 MHz clk
-			killShip => killShipSig, -- kill ship signal
-			playercontrols => player_controls, --up, down, left, right, shoot
+			pause => pause, 					-- output of pause FSM
+			clk => clk, 						-- 50 MHz clk
+			killShip => killShipSig, 			-- kill ship signal
+			playercontrols => player_controls,  --up, down, left, right, shoot
 			hcount => hcount,
 			vcount => vcount,
 			points => gameObjMatrix(0, 0).points,
@@ -128,7 +125,8 @@ BEGIN
 			lives => gameObjMatrix(0, 0).lives,
 			ledFix => ledFix(0)
 		);
-	-------------------------------------------------------------------------------------------------------
+
+	-----------------------------------------*** Added by Blake--------------
 	-- This entity receives game dynamics signals and outputs the enemys' dynamics data for pixel-mapping
 	enemyAnim : ENTITY work.enemies
 		PORT MAP(
@@ -150,8 +148,7 @@ BEGIN
 			small1Height => gameObjMatrix(0, 2).objHeight, small2Height => gameObjMatrix(1, 2).objHeight, small3Height => gameObjMatrix(2, 2).objHeight, Med1Height => gameObjMatrix(3, 2).objHeight, Med2Height => gameObjMatrix(4, 2).objHeight, Med3Height => gameObjMatrix(5, 2).objHeight, big1Height => gameObjMatrix(6, 2).objHeight, big2Height => gameObjMatrix(7, 2).objHeight, big3Height => gameObjMatrix(8, 2).objHeight,
 			waveCountOut => waveCount
 		);
-
-	--NEW CODE********************************************
+	-----------------------------------------*** Added by Blake--------------
 	shootingEnemiesEntity : ENTITY work.shootingEnemies
 		PORT MAP(
 			-- inputs:
@@ -176,9 +173,7 @@ BEGIN
 			ledfix(2) => ledfix(2)
 		);
 
-	--*********************************************************
-
-	-------------------------------------------------------------------------------------------------------
+	-----------------------------------------*** Added by Blake--------------
 	-- This entity receives game dynamics signals and outputs the enemys' dynamics data for pixel-mapping
 	objectAnim : ENTITY work.objects
 		PORT MAP(
@@ -230,7 +225,7 @@ BEGIN
 			pause => pause,
 			terrainDataOut => terrain_Sig
 		);
-	----------------------------------------------------------------------------
+	------------------------------------------*** Added by Nathan---------------
 	sound : ENTITY work.sound
 		PORT MAP(
 			ARDUINO_IO => ARDUINO_IO,
@@ -238,7 +233,7 @@ BEGIN
 			pause => pause,
 			shootSound => soundLaser
 		);
-	----------------------------------------------------------------------------
+	-----------------------------------------*** Added by Blake--------------
 	checkShipCollisions : PROCESS (clk, endGame)
 		VARIABLE setkillShip : STD_LOGIC := '0';
 		VARIABLE setkillLaser, setKillObject : STD_LOGIC_VECTOR(4 DOWNTO 0) := (OTHERS => '0');
@@ -283,7 +278,6 @@ BEGIN
 						setKillEnemy(j) := '1';
 					END IF;
 					FOR i IN 0 TO 4 LOOP
-						--************************NEW*********************************
 						IF (i < 2) THEN
 							m := i;
 						ELSE
@@ -292,9 +286,8 @@ BEGIN
 						IF (drawElementArrayMatrix(m, 5).pixelOn AND drawElementArrayMatrix(0, 0).pixelOn) THEN
 							setkillEnemyLaser(m) := '1';
 							setKillShip := '1';
-							--gameObjMatrix(0,0).lives <= gameObjMatrix(0,0).lives - 1;
 						END IF;
-						--************************NEW ^*************************************
+
 						IF (drawElementArrayMatrix(0, 0).pixelOn AND drawElementArrayMatrix(i, 3).pixelOn) THEN
 							setkillShip := '1';
 							setKillObject(i) := '1';
@@ -308,7 +301,7 @@ BEGIN
 							setKillEnemy(j) := '1';
 							ptsToGive := gameObjMatrix(j, 2).points;
 						END IF;
-						--NEW**************************************************************************************
+
 						IF (drawElementArrayMatrix(i, 1).pixelOn AND drawElementArrayMatrix(0, 4).pixelOn) THEN
 							setkillLaser(i) := '1';
 							setKillShootingEnemy(0) := '1';
@@ -321,7 +314,6 @@ BEGIN
 							setkillLaser(i) := '1';
 							setKillShootingEnemy(2) := '1';
 							ptsToGive := gameObjMatrix(2, 4).points;
-							--****************************************************************************************************
 						END IF;
 					END LOOP;
 				END LOOP;
@@ -426,14 +418,13 @@ BEGIN
 		END IF;
 	END PROCESS;
 
-	---------------------------------------------------------------------------------------------------------
-	--------------------------------------------------------------------------------------------------------------------
+	-----------------------------------------*** Added by Blake--------------
 	Lasers : ENTITY work.laser
-		PORT MAP(-- inputs"
-			pause => pause, -- in
-			clk => clk, --in
+		PORT MAP(
+			pause => pause,
+			clk => clk,
 			killLaser => killLaserSig,
-			playerControls => player_controls, --in
+			playerControls => player_controls,
 			hcount => hcount,
 			vcount => vcount,
 			ship => gameObjMatrix(0, 0), --in
@@ -443,8 +434,7 @@ BEGIN
 			laser4out => gameObjMatrix(3, 1),
 			laser5out => gameObjMatrix(4, 1)
 		);
-	-------------------------------------------------------------------------------------------------------------------------
-
+-----------------------------------------*** Added by Nathan--------------
 	drawShip : PROCESS (hcount, vcount)
 	BEGIN
 		ship_rom_addr <= vCount - gameObjMatrix(0, 0).position.y;
@@ -454,7 +444,7 @@ BEGIN
 		ship_rom_bit <= ship_rom_data(ship_rom_col);
 		IF (hCount >= gameObjMatrix(0, 0).position.x AND hCount <= gameObjMatrix(0, 0).position.x + gameObjMatrix(0, 0).objwidth - 1 AND vcount >= gameObjMatrix(0, 0).position.y AND vcount <= gameObjMatrix(0, 0).position.y + gameObjMatrix(0, 0).objheight - 1) THEN
 			-- Calculating the addr and col of the ROM for the ship
-			sq_ship_on <= '1'; -- DrawElementArraysig(0).pixelOn <= true;
+			sq_ship_on <= '1';
 		ELSE
 			sq_ship_on <= '0';
 		END IF;
@@ -466,7 +456,7 @@ BEGIN
 		END IF;
 	END PROCESS;
 
-	-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+	-----------------------------------------*** Added by Nathan--------------
 	drawlasers : PROCESS (hcount, vcount)
 	BEGIN
 		FOR z IN 0 TO 4 LOOP
@@ -481,14 +471,14 @@ BEGIN
 			END IF;
 		END LOOP;
 	END PROCESS;
-	----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+	-----------------------------------------*** Added by Nathan--------------
 	drawShootingEnemies : PROCESS (hcount, vcount) -- ADD ROMS TO THIS PROCESS
 		VARIABLE shootalien_rom_bit : INTEGER;
 		VARIABLE shootalien_rom_addr, shootalien_rom_col : INTEGER;
 	BEGIN
 		FOR f2 IN 0 TO 8 LOOP
 			IF (hCount >= gameObjMatrix(f2, 4).position.x AND hCount <= gameObjMatrix(f2, 4).position.x + gameObjMatrix(f2, 4).objwidth - 1 AND vcount >= gameObjMatrix(f2, 4).position.y AND vcount <= gameObjMatrix(f2, 4).position.y + gameObjMatrix(f2, 4).objheight - 1) THEN
-				----------------Nathan's code-----------------------------------------------------------------
 				-- Calculating the addr and col of the ROM for the ship
 				shootalien_rom_addr := vCount - gameObjMatrix(f2, 4).position.y;
 				shootalien_rom_col := hCount - gameObjMatrix(f2, 4).position.x;
@@ -518,7 +508,8 @@ BEGIN
 			END IF;
 		END LOOP;
 	END PROCESS;
-	----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+	-----------------------------------------*** Added by Nathan--------------
 	drawEnemylasers : PROCESS (hcount, vcount)
 	BEGIN
 		FOR z2 IN 0 TO 2 LOOP
@@ -562,12 +553,11 @@ BEGIN
 			END IF;
 		END LOOP;
 	END PROCESS;
-	-------------------------------------------------------------------------------------------------------------------------------------------------------
+	-----------------------------------------*** Added by Nathan--------------
 	drawEnemies : PROCESS (hcount, vcount)
 	BEGIN
 		FOR f IN 0 TO 8 LOOP
 			IF (hCount >= gameObjMatrix(f, 2).position.x AND hCount <= gameObjMatrix(f, 2).position.x + gameObjMatrix(f, 2).objwidth - 1 AND vcount >= gameObjMatrix(f, 2).position.y AND vcount <= gameObjMatrix(f, 2).position.y + gameObjMatrix(f, 2).objheight - 1) THEN
-				----------------Nathan's code-----------------------------------------------------------------
 				-- Calculating the addr and col of the ROM for the ship
 				alien_rom_addr <= vCount - gameObjMatrix(f, 2).position.y;
 				alien_rom_col <= hCount - gameObjMatrix(f, 2).position.x;
@@ -595,9 +585,8 @@ BEGIN
 			END IF;
 		END LOOP;
 	END PROCESS;
-	------------------------------------------------------------------------------------------
-	--------------------------- DRAW THE STARS -----------------------------------------------
-
+	-----------------------------------------*** Added by Nathan--------------
+	--DRAW THE STARS
 	drawSky : PROCESS (hcount, vcount)
 	BEGIN
 
@@ -608,8 +597,8 @@ BEGIN
 		END IF;
 	END PROCESS;
 
-	------------------------------------------------------------------------------------------------------------------------------------------------------
-	--------------------------------------------------------------------------------------------------------------------------------------
+
+	-----------------------------------------*** Added by Nathan--------------
 	drawFrame : PROCESS (hcount, vcount)
 		VARIABLE tempGameMatrix : type_gameObjMatrix := gameObjMatrix;
 		VARIABLE tempDrawMatrix : drawElementMatrix := drawElementArrayMatrix;
@@ -689,7 +678,8 @@ BEGIN
 			blue_out <= (OTHERS => '0');
 		END IF;
 	END PROCESS;
-	--------------------------------------------------------------------------------------------------------
+
+	-----------------------------------------*** Added by Nathan--------------
 	-- Process for drawing explosions
 	drawExplosions : PROCESS (vcount, hcount)
 	BEGIN
@@ -794,7 +784,9 @@ BEGIN
 			END LOOP;
 		END IF;
 	END PROCESS;
-	---------------- LATCH IN THE PAUSE STATE -------------------
+
+	-----------------------------------------*** Added by Blake--------------
+	--LATCH IN THE PAUSE STATE
 	pauseGame : PROCESS (clk, EndGame)
 		VARIABLE setpause : BOOLEAN := false;
 	BEGIN
@@ -817,8 +809,8 @@ BEGIN
 			END IF;
 		END IF;
 	END PROCESS;
-	-------------------------------------------------------------
 
+	-----------------------------------------*** Added by Nathan--------------
 	laserSound : PROCESS (clk)
 		VARIABLE setSound : BOOLEAN := false;
 		VARIABLE soundLaserV : STD_LOGIC := '0';

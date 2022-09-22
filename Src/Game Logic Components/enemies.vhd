@@ -1,3 +1,9 @@
+------------------------------------------------------------------------------------------------------------------------------------------
+-- Project: Defender (DSD Final Project Fall 2021)
+-- Author: Blake Martin
+-- Date: 11/05/21
+------------------------------------------------------------------------------------------------------------------------------------------
+
 LIBRARY IEEE;
 USE IEEE.std_logic_1164.ALL;
 USE IEEE.numeric_std.ALL;
@@ -5,13 +11,14 @@ LIBRARY work;
 USE work.graphicsPackage.ALL;
 ENTITY enemies IS
 	PORT (
-		-- inputs:
+		-- Inputs:
 		clk : IN STD_LOGIC;
 		pause : IN STD_LOGIC := '0';
 		EndGame : IN STD_LOGIC := '0';
 		killEnemy : IN STD_LOGIC_VECTOR(8 DOWNTO 0);
 		hcount : IN INTEGER;
 		vcount : IN INTEGER;
+		-- Outputs:
 		Wavereset : OUT STD_LOGIC;
 		small1Pt, small2Pt, small3Pt, Med1Pt, Med2Pt, Med3Pt, big1Pt, big2Pt, big3Pt : OUT INTEGER;
 		small1Pos, small2Pos, small3Pos, med1Pos, med2Pos, med3Pos, big1Pos, big2Pos, big3Pos : OUT point_2D;
@@ -25,33 +32,31 @@ ENTITY enemies IS
 	);
 END ENTITY;
 ARCHITECTURE enemiesArch OF enemies IS
-	-------------------------------------------------------------------------------
+	------------------------------------------------------------------------------------
 	--Enemy Objects:
 	SIGNAL smallArray, smallArrayOut : type_gameObjArray(2 DOWNTO 0) := (OTHERS => init_small);
 	SIGNAL MedArray, MedArrayOut : type_gameObjArray(2 DOWNTO 0) := (OTHERS => init_med);
 	SIGNAL bigArray, BigArrayOut : type_gameObjArray(2 DOWNTO 0) := (OTHERS => init_big);
 	SIGNAL deadReg : STD_LOGIC_VECTOR(8 DOWNTO 0) := "000000000";
 	SIGNAL WaveResetSig : STD_LOGIC := '0';
-	-----------------------------------------------------------------------------
+	------------------------------------------------------------------------------------
+	-- Clks
 	SIGNAL clk_Count : INTEGER := 0;
 	SIGNAL clkprescaler : INTEGER := 5000000; --50 MHz / clk_prescaler = desired speed
-
-	--**************************************************************************
+	SIGNAL RandClk : STD_LOGIC := '0';
+	------------------------------------------------------------------------------------
 	TYPE intArray IS ARRAY(NATURAL RANGE <>) OF INTEGER;
 	SIGNAL enemyMod : intArray(8 DOWNTO 0);
 
 	SIGNAL currWait : STD_LOGIC_VECTOR(11 DOWNTO 0) := (OTHERS => '1');
 	SIGNAL NextState : STD_LOGIC_VECTOR(11 DOWNTO 0);
 	SIGNAL feedback : STD_LOGIC;
-	SIGNAL setSmall : STD_LOGIC_VECTOR(2 DOWNTO 0) := (OTHERS => '0');
-
-	SIGNAL LiveEnemies : STD_LOGIC_VECTOR(11 DOWNTO 0) := "000000000000"; -- 12 enemies
 	SIGNAL startState : STD_LOGIC_VECTOR(11 DOWNTO 0) := "111111111111"; -- intial state
 	SIGNAL setReg : STD_LOGIC_VECTOR(8 DOWNTO 0) := "000000000";
 	SIGNAL stickyReg : STD_LOGIC_VECTOR(8 DOWNTO 0) := "000000000";
-	SIGNAL RandClk : STD_LOGIC := '0';
 	SIGNAL waveCount : INTEGER := 0;
 	SIGNAL holdKill : STD_LOGIC_VECTOR(8 DOWNTO 0) := (OTHERS => '0');
+
 	COMPONENT clock_divider IS PORT (clk_in : IN STD_LOGIC;
 		clk_out : OUT STD_LOGIC);
 	END COMPONENT;

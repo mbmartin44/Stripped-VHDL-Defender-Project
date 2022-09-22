@@ -36,7 +36,7 @@ entity fontROM is
 end fontROM;
 
 architecture Behavioral of fontROM is
-   
+
 
 	type rom_type is array (0 to 2**addrWidth-1) of std_logic_vector(dataWidth-1 downto 0);
 
@@ -2226,7 +2226,7 @@ begin
 	setRegA: process (clkA)
 	begin
 		if rising_edge(clkA) then
-		
+
 			-- Write to rom
 			if(writeEnableA = '1') then
 				ROM(to_integer(unsigned(addrA))) <= dataInA;
@@ -2236,5 +2236,5 @@ begin
 
 		end if;
 	end process;
-	
+
 end Behavioral;
