@@ -3,10 +3,12 @@
 -- Authors: Blake Martin & Nathan Gardner
 -- Date: 11/30/21
 ------------------------------------------------------------------------------------------------------------------------------------------
-LIBRARY iEEE;
+LIBRARY IEEE;
 USE IEEE.std_logic_1164.ALL;
 USE IEEE.numeric_std.ALL;
 USE IEEE.std_logic_arith.conv_std_logic_vector;
+
+-- Custom PKG
 LIBRARY work;
 USE work.graphicsPackage.ALL;
 
